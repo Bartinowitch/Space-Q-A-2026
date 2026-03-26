@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Meeting Q&A – Bruno Zemp</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --border: #d6dde8;
+    --border-strong: #b0bdd0;
+    --text: #1a2333;
+    --muted: #5a6a82;
+    --hint: #8a9ab2;
+    --accent: #004F9F;
+    --accent-light: #e8eef7;
+    --accent-dark: #003a78;
+    --warn-bg: #fef6e4;
+    --warn-text: #7a5800;
+    --open-bg: #e8eef7;
+    --open-border: #004F9F;
+    --done-bg: #eef7ee;
+    --done-border: #6abf69;
+  }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 48px 32px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header {
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .header-title {
+    font-size: 26px;
+    font-weight: bold;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .header-meta {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* BLOCK */
+  .block { margin-bottom: 32px; }
+  .block-label {
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+
+  /* QA CARD */
+  .qa-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .qa-card:hover { border-color: var(--border-strong); }
+  .qa-card.answered { border-left: 3px solid #6abf69; }
+
+  .qa-question {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .qa-num {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--accent);
+    padding-top: 2px;
+    min-width: 22px;
+  }
+  .qa-q-text {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .qa-sub {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .qa-toggle {
+    font-size: 11px;
+    color: var(--hint);
+    padding-top: 4px;
+    transition: transform 0.2s;
+  }
+  .qa-card.open .qa-toggle { transform: rotate(180deg); }
+
+  .qa-body {
+    display: none;
+    padding: 0 16px 14px 52px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  .qa-card.open .qa-body { display: block; }
+
+  .answer-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hint);
+    margin-bottom: 6px;
+  }
+  .answer-field {
+    width: 100%;
+    min-height: 72px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: #f0f4fa;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .answer-field:focus { border-color: var(--border-strong); background: #fff; }
+  .answer-field::placeholder { color: var(--hint); }
+
+  /* TABLE BLOCK */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hint);
+    background: var(--bg);
+    padding: 8px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    font-size: 13px;
+  }
+  tr:last-child td { border-bottom: none; }
+  td:first-child {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--hint);
+    width: 28px;
+  }
+  td:nth-child(2) { font-weight: 400; color: var(--text); }
+
+  .prio-select, .owner-input {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: var(--text);
+    background: #f0f4fa;
+    outline: none;
+    cursor: pointer;
+  }
+  .prio-select { width: 100px; }
+  .owner-input { width: 140px; }
+  .prio-select:focus, .owner-input:focus { border-color: var(--border-strong); background: #fff; }
+
+  .chip {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+  .chip-high { background: #fce8e8; color: #b33; }
+  .chip-mid { background: var(--warn-bg); color: var(--warn-text); }
+  .chip-low { background: #eef7ee; color: #2a7a2a; }
+  .chip-open { background: #f0ede6; color: var(--muted); }
+
+  /* FOOTER NOTE */
+  .footer-note {
+    margin-top: 32px;
+    padding: 14px 16px;
+    background: #f0f4fa;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: bold;
+  }
+
+  /* TOOLBAR */
+  .toolbar {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+  }
+  .btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    transition: all 0.15s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+  }
+  .btn-secondary:hover { background: #f0f4fa; }
+
+  /* PRINT */
+  @media print {
+    body { padding: 20px; background: #fff; max-width: 100%; font-size: 12px; }
+    .toolbar { display: none; }
+    .qa-body { display: block !important; }
+    .qa-toggle { display: none; }
+    .qa-card { break-inside: avoid; border: 1px solid #ccc; margin-bottom: 6px; }
+    .answer-field { background: #f9f9f9; border: 1px solid #ddd; min-height: 48px; }
+    .prio-select, .owner-input { border: 1px solid #ddd; }
+    table { font-size: 11px; }
+    .block { margin-bottom: 20px; }
+    .header { margin-bottom: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Schurter R&D · Space Business</div>
+  <div class="header-title">Meeting Q&A – Bruno Zemp</div>
+  <div class="header-meta">
+    <span>Datum: <strong id="date-field" contenteditable="true" style="outline:none; border-bottom: 1px dashed var(--border-strong);">26.03.2026</strong></span>
+    <span>Teilnehmer: Bruno · Melisa · Reto · Martin</span>
+  </div>
+</div>
+
+<!-- BLOCK 1 -->
+<div class="block">
+  <div class="block-label">Block 1 · Strategie &amp; Ziele</div>
+
+  <div class="qa-card open">
+    <div class="qa-question" onclick="toggle(this)">
+      <span class="qa-num">Q1</span>
+      <div class="qa-q-text">
+        Was ist dein konkretes Ziel für Schurter im Space-Segment?
+        <div class="qa-sub">Umsatz, Produkte, Zielmärkte, Zeitraum.</div>
+      </div>
+      <span class="qa-toggle">▼</span>
+    </div>
+    <div class="qa-body">
+      <div class="answer-label">Antwort / Notizen</div>
+      <textarea class="answer-field" placeholder="Notizen hier..."></textarea>
+    </div>
+  </div>
+
+  <div class="qa-card open">
+    <div class="qa-question" onclick="toggle(this)">
+      <span class="qa-num">Q2</span>
+      <div class="qa-q-text">
+        Welche bestehenden Produkte siehst du als realistischen Einstiegspunkt?
+        <div class="qa-sub">Welche Qualifikationsanforderungen (ausser ESA ESCC Enhanced Grade) kommen damit auf R&D zu?</div>
+      </div>
+      <span class="qa-toggle">▼</span>
+    </div>
+    <div class="qa-body">
+      <div class="answer-label">Antwort / Notizen</div>
+      <textarea class="answer-field" placeholder="Notizen hier..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCK 2 -->
+<div class="block">
+  <div class="block-label">Block 2 · Ressourcen &amp; Prioritäten</div>
+
+  <div class="qa-card open">
+    <div class="qa-question" onclick="toggle(this)">
+      <span class="qa-num">Q3</span>
+      <div class="qa-q-text">
+        Was erwartest du konkret von R&D SAG – und bis wann?
+        <div class="qa-sub">Welche Deliverables, welcher Zeithorizont?</div>
+      </div>
+      <span class="qa-toggle">▼</span>
+    </div>
+    <div class="qa-body">
+      <div class="answer-label">Antwort / Notizen</div>
+      <textarea class="answer-field" placeholder="Notizen hier..."></textarea>
+    </div>
+  </div>
+
+  <div class="qa-card open">
+    <div class="qa-question" onclick="toggle(this)">
+      <span class="qa-num">Q4</span>
+      <div class="qa-q-text">
+        Wie priorisierst du Space gegenüber den laufenden NPI-Projekten?
+        
+      </div>
+      <span class="qa-toggle">▼</span>
+    </div>
+    <div class="qa-body">
+      <div class="answer-label">Antwort / Notizen</div>
+      <textarea class="answer-field" placeholder="Notizen hier..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCK 3 -->
+<div class="block">
+  <div class="block-label">Block 3 · Organisation &amp; Ownership</div>
+
+  <div class="qa-card open">
+    <div class="qa-question" onclick="toggle(this)">
+      <span class="qa-num">Q5</span>
+      <div class="qa-q-text">
+        Wer ist der Space Business Owner – Melisa, NT-Team oder du?
+        <div class="qa-sub">Was ist die Rolle von Reto? Wie wird Dinos operative Verantwortung aufgefangen?</div>
+      </div>
+      <span class="qa-toggle">▼</span>
+    </div>
+    <div class="qa-body">
+      <div class="answer-label">Antwort / Notizen</div>
+      <textarea class="answer-field" placeholder="Notizen hier..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCK 4 -->
+<div class="block">
+  <div class="block-label">Block 4 · Compliance &amp; Audit</div>
+
+  <div class="qa-card open">
+    <div class="qa-question" onclick="toggle(this)">
+      <span class="qa-num">Q6</span>
+      <div class="qa-q-text">
+        Product Compliance vs. Process Compliance
+        <div class="qa-sub">ESA Audit 2025: "not satisfying" – konkrete Findings? Wer ist Owner der Korrekturmassnahmen, bis wann?</div>
+      </div>
+      <span class="qa-toggle">▼</span>
+    </div>
+    <div class="qa-body">
+      <div class="answer-label">Antwort / Notizen</div>
+      <textarea class="answer-field" placeholder="Notizen hier..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCK 5 -->
+<div class="block">
+  <div class="block-label">Block 5 · Laufende Aufgaben &amp; Roadmap – Owner &amp; Priorität klären</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Thema</th>
+          <th>Priorität</th>
+          <th>Owner</th>
+        </tr>
+      </thead>
+      <tbody id="themen-body">
+        <tr>
+          <td>1</td>
+          <td>ESA QML – Enhanced Grade Qualifikation</td>
+          <td><select class="prio-select" onchange="setPrio(this)"><option value="">– offen –</option><option value="high">Hoch</option><option value="mid">Mittel</option><option value="low">Niedrig</option></select></td>
+          <td><input class="owner-input" type="text" placeholder="Name..."></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Requalifikation bestehender Produkte</td>
+          <td><select class="prio-select" onchange="setPrio(this)"><option value="">– offen –</option><option value="high">Hoch</option><option value="mid">Mittel</option><option value="low">Niedrig</option></select></td>
+          <td><input class="owner-input" type="text" placeholder="Name..."></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Cost Improvement</td>
+          <td><select class="prio-select" onchange="setPrio(this)"><option value="">– offen –</option><option value="high">Hoch</option><option value="mid">Mittel</option><option value="low">Niedrig</option></select></td>
+          <td><input class="owner-input" type="text" placeholder="Name..."></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Lieferantenbeziehung (CICOR u.a.)</td>
+          <td><select class="prio-select" onchange="setPrio(this)"><option value="">– offen –</option><option value="high">Hoch</option><option value="mid">Mittel</option><option value="low">Niedrig</option></select></td>
+          <td><input class="owner-input" type="text" placeholder="Name..."></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Neues Substrat (Glass → Ceramic)</td>
+          <td><select class="prio-select" onchange="setPrio(this)"><option value="">– offen –</option><option value="high">Hoch</option><option value="mid">Mittel</option><option value="low">Niedrig</option></select></td>
+          <td><input class="owner-input" type="text" placeholder="Name..."></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Prozessänderungen</td>
+          <td><select class="prio-select" onchange="setPrio(this)"><option value="">– offen –</option><option value="high">Hoch</option><option value="mid">Mittel</option><option value="low">Niedrig</option></select></td>
+          <td><input class="owner-input" type="text" placeholder="Name..."></td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>China White Label Projekt</td>
+          <td><select class="prio-select" onchange="setPrio(this)"><option value="">– offen –</option><option value="high">Hoch</option><option value="mid">Mittel</option><option value="low">Niedrig</option></select></td>
+          <td><input class="owner-input" type="text" placeholder="Name..."></td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Produkt-Roadmap – ist R&D EMEAI involviert?</td>
+          <td><select class="prio-select" onchange="setPrio(this)"><option value="">– offen –</option><option value="high">Hoch</option><option value="mid">Mittel</option><option value="low">Niedrig</option></select></td>
+          <td><input class="owner-input" type="text" placeholder="Name..."></td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>Space Passive Components Day</td>
+          <td><select class="prio-select" onchange="setPrio(this)"><option value="">– offen –</option><option value="high">Hoch</option><option value="mid">Mittel</option><option value="low">Niedrig</option></select></td>
+          <td><input class="owner-input" type="text" placeholder="Name..."></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="padding: 10px 14px; border-top: 1px solid var(--border);">
+      <button class="btn btn-secondary" onclick="addRow()" style="font-size:12px; padding: 6px 14px;">+ Thema hinzuf&uuml;gen</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button class="btn btn-secondary" onclick="expandAll()">Alle öffnen</button>
+  <button class="btn btn-primary" onclick="window.print()">Als PDF speichern ↗</button>
+</div>
+
+<script>
+  function toggle(el) {
+    el.closest('.qa-card').classList.toggle('open');
+  }
+  function expandAll() {
+  
+  function addRow() {
+    const tbody = document.querySelector('#themen-body');
+    const num = tbody.querySelectorAll('tr').length + 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${num}</td>
+      <td><input type="text" placeholder="Neues Thema..." style="width:100%; border:none; outline:none; font-family:Arial,Helvetica,sans-serif; font-size:13px; color:var(--text); background:transparent;"></td>
+      <td><select class="prio-select" onchange="setPrio(this)"><option value="">– offen –</option><option value="high">Hoch</option><option value="mid">Mittel</option><option value="low">Niedrig</option></select></td>
+      <td><input class="owner-input" type="text" placeholder="Name..."></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  document.querySelectorAll('.qa-card').forEach(c => c.classList.add('open'));
+  }
+  function setPrio(sel) {
+    const val = sel.value;
+    sel.className = 'prio-select';
+    if (val === 'high') sel.style.cssText = 'background:#fce8e8;color:#b33;border-color:#f4b0b0;';
+    else if (val === 'mid') sel.style.cssText = 'background:#fef6e4;color:#8a6200;border-color:#e8c84a;';
+    else if (val === 'low') sel.style.cssText = 'background:#eef7ee;color:#2a7a2a;border-color:#9dd09d;';
+    else sel.style.cssText = '';
+  }
+
+  function addRow() {
+    const tbody = document.querySelector('#themen-body');
+    const num = tbody.querySelectorAll('tr').length + 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${num}</td>
+      <td><input type="text" placeholder="Neues Thema..." style="width:100%; border:none; outline:none; font-family:Arial,Helvetica,sans-serif; font-size:13px; color:var(--text); background:transparent;"></td>
+      <td><select class="prio-select" onchange="setPrio(this)"><option value="">– offen –</option><option value="high">Hoch</option><option value="mid">Mittel</option><option value="low">Niedrig</option></select></td>
+      <td><input class="owner-input" type="text" placeholder="Name..."></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  document.querySelectorAll('.answer-field').forEach(f => {
+    f.addEventListener('input', () => {
+      const card = f.closest('.qa-card');
+      if (f.value.trim()) card.classList.add('answered');
+      else card.classList.remove('answered');
+    });
+  });
+</script>
+</body>
+</html>
